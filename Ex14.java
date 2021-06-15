@@ -1,0 +1,159 @@
+
+/**
+ * 
+ * A class that contains the solutions to the four questions of Maman 14
+ * 
+ * @author (Gal Ben Artzi)
+ */
+public class Ex14
+{
+    //---------------------------------------------- EX 1 ---------------------------------------------\\
+
+    /**
+     * This method returns the highest difference between two numbers in the array
+     * The largest number between them must be before the lowest number in the array
+     * 
+     * The time complexity of this method is O(n) (linear) because in the worst case it goes through the array only once
+     * 
+     * @param a The array in which the search is performed
+     * @return The largest fall in the array depending on the conditions
+     */
+    public static int maximalDrop (int [] a){
+        int maxDif = 0;
+        int max = a[0];
+
+        for (int i = 1; i < a.length ; i++){
+            if(max - a[i] > maxDif)
+                maxDif =max - a[i];
+            if (a[i] > max)                    //If a larger number is found then it becomes the maximum because there may be a larger fall from it      
+                max = a[i];
+
+        }
+        return maxDif;
+    }
+
+    //---------------------------------------------- EX 2 ---------------------------------------------\\
+    /**
+     * This method returns the position of the sink in the array - a point where the x value and the y value are equal and the point value is 0 
+     * In addition, the entire row of the sink should be filled with values of 0 
+     * and the entire column should be filled with values of 1 (except the sink itself).
+     * 
+     * The time complexity of this method is O(n) (linear).
+     * Although the method has two nested loops in the worst case the method will go over the length of the array only once and its width only once too.
+     * Then, the method will go over again the row and column in which the sink is located
+     * So overall the complexity will be 4n that we consider it as complexity of O(n).
+     * 
+     * 
+     * @param a The array in which the search of the sink is performed
+     * @return The number of the x and y values of the point (they are equal) and return -1 if there is no sink in the array
+     */
+    public static int isSink (int [][] mat){
+        int sink = -1;
+        int tempj = 0;
+        //If 1 is in a row then there is no chance that the sink is in that row so whenever 1 is found, we go down a row
+        //If 0 is at a certain point there is no chance that the sink will be in this column in the rows below it.
+        // This is because 0 exists in that column. Then one column can be advanced
+        for (int i=0 ; i < mat[0].length ; i++){
+            for (int j=tempj ; j < mat.length ; j++){
+                if (mat [i] [j] != 0){                             //If the dot does not contain 0 then move on to the next line. 
+                    tempj = j;                                     // The value of the column needs to be saved so that we do not go back to the beginning of the line each time
+                    j = mat.length;
+                }
+
+                if (j == mat[i].length -1)                         //When we reach the end of the line we will define the point of the sink
+                    sink = i;
+            }   
+        }
+
+        if (sink == -1)                                           //This situation will happen when the array is large [0] [0] and therefore there is no sink
+            return -1;
+
+        for (int k = 0 ; k < mat[0].length ; k++){               //A check that the entire row does contain only 0
+            if (mat[sink] [k] != 0)
+                return -1;
+        } 
+
+        for (int m = 0 ; m < mat.length ; m++){                 //A check that the whole column (except the sink) does contain only 1
+            if (mat[m] [sink] != 1){
+                if ( m != sink)
+                    return -1;
+            }
+        }
+        return sink;
+    }
+
+    //---------------------------------------------- EX 3 ---------------------------------------------\\
+
+    /**
+     * The method returns the largest "stain" size in the array.
+     * A stain is a point in the array that is not empty.
+     * Stain size is defined as a sequence of squares that make up the stain that connects them by a common vertex
+     * 
+     * @param mat The array in which the search is performed
+     * @param x The x values of a point contained in the stain and from which the stain size is searched
+     * @param y The y values of a point contained in the stain and from which the stain size is searched
+     * @return The size of the stain in which the stain is contained, if there is no stain will be returned zero
+     */
+    public static int size (boolean[][] mat, int x, int y){
+        if (x < 0 || y < 0 || x > mat.length -1 || y > mat[0].length -1)    //Checks if the point is within a range in the array
+            return 0;
+        if (mat [x] [y] == false)
+            return 0;
+        int [] [] temp = new int [mat.length] [mat[0].length];              //Create an empty array of the same size as the given array
+        //This is so that we can mark the places we have been to  avoid duplication when summing
+
+        return size(mat , x ,y , temp);                                     //Passes the given parameters and the  new array to the method which the size of the stain
+    }
+
+    private static int size (boolean[][] mat, int x, int y , int[] [] temp){
+        if (x < 0 || y < 0 || x > mat.length -1 || y > mat[0].length -1)     //Checks if the point is within a range in the array
+            return 0;
+
+        if (temp [x] [y] == 2)                                               //If we were already at this point do not continue to search for stain
+            return 0;
+
+        temp [x] [y] = 2;                                                   //Put the value 2 in the new array at the point where we are so that we do not repeat it again
+
+        if(mat [x] [y] == true){                                            //Return the sum of stain spread in all adjacent cells and add 1 (the cell we are currently in)
+            return (1+size(mat,x+1,y,temp) + size(mat,x-1,y,temp) + size(mat,x,y+1,temp) + size(mat,x,y-1,temp)
+                +size(mat,x+1,y+1,temp)+size(mat,x-1,y+1,temp) + size(mat,x-1,y-1,temp) +size(mat,x+1,y-1,temp) );
+        }
+        else 
+            return 0;                                                       //If the cell is not a stain you will return 0 to the sum
+    }
+
+    //---------------------------------------------- EX 4 ---------------------------------------------\\
+
+    /**
+     * The method returns whether the two arrays obtained permutation of each other - they contain the same organ (possibly in a different order)
+     * 
+     * @param a An array comparing to the second given array
+     * @param b An array comparing to the first given array
+     * @return true if they are permutation of each other, otherwise returns false
+     */
+    public static boolean isPermutation (int [] a, int [] b){
+        if( a.length != b.length)        //Make sure the strings are the same length
+            return false;
+
+        boolean [] bool = new boolean [b.length] ;      //Creates an empty boolean array in which it will be possible to mark which cells I have already used
+        int aInd =0 , bInd = 0;                         //Defines two variables that move on the two עgiven arrays   
+        return isPermutation (a,b,bool , aInd ,bInd); 
+
+    }
+
+    private static boolean isPermutation (int [] a, int [] b , boolean[] bool , int aInd , int bInd){
+
+        if (aInd == a.length)        //If we get to the end of this string, a sign that we have found all the numbers will return true
+            return true;
+
+        if (bInd == b.length)        // If we have reached the end of this string, it means that there is a number in one string which is not in the other string and we will return false
+            return false;
+
+        if(a[aInd] == b[bInd] && (bool[bInd] == false)){   //If the number is found and we have not used it yet then we will move forward in this array
+            bool[bInd] = true;
+            bInd = 0;
+            return isPermutation(a,b,bool , aInd+1,bInd);
+        }
+        else return isPermutation(a,b,bool , aInd ,bInd+1);   //If the number is not found, we will advance to the second set and check if it has a suitable number
+    }
+}
